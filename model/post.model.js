@@ -10,8 +10,8 @@ const PostSchema = new Schema({
         type: String,
         required: true
     },
-    pageId: {
-        type: Number,
+    page: {
+        type: String,
         required: true
     },
     upCoins: {
