@@ -9,17 +9,13 @@ var mongodb = require('./config/mongo.db');
 var userroutes_v1 = require('./api/user.routes.v1');
 var auth_routes_v1 = require('./api/authentication.routes.v1');
 var post_routes_v1 = require('./api/post.routes.v1');
+var subscription_routes_v1 = require('./api/subscription.routes.v1');
 var config = require('./config/env/env');
-// var expressJWT = require('express-jwt');
+var configKey = require('./config/config');
+var expressJWT = require('express-jwt');
 
 var app = express();
 
-// Met module.exports kunnen we variabelen beschikbaar maken voor andere bestanden.
-// Je zou dit kunnen vergelijken met het 'public' maken van attributen in Java.
-// Javascript neemt impliciet aan dat bovenaan ieder bestand de volgende regel staat.
-// Deze kun je dus weglaten!
-// Zie eventueel ook: https://www.sitepoint.com/understanding-module-exports-exports-node-js/  
-module.exports = {};
 
 // bodyParser zorgt dat we de body uit een request kunnen gebruiken,
 // hierin zit de inhoud van een POST request.
@@ -31,23 +27,19 @@ app.use(bodyParser.json({
     type: 'application/vnd.api+json'
 })); // parse application/vnd.api+json as json
 
-// Beveilig alle URL routes, tenzij het om /login of /register gaat.
-// app.use(expressJWT({
-//     secret: config.secretkey
-// }).unless({
-//     path: [
-//         { url: '/api/v1/login', methods: ['POST'] },
-//         { url: '/api/v1/register', methods: ['POST'] }
-//     ]
-// }));
+//Beveilig alle URL routes, tenzij het om /login of /register gaat.
+app.use(expressJWT({
+    secret: configKey.secretkey
+}).unless({
+    path: [
+        { url: '/api/v1/login', methods: ['POST'] },
+        { url: '/api/v1/users', methods: ['POST'] }
+    ]
+}));
 
 // configureer de app
 app.set('port', (process.env.PORT || config.env.webPort));
 app.set('env', (process.env.ENV || 'development'))
-
-// wanneer je je settings wilt controleren
-// console.dir(config);
-// console.log(config.dburl);
 
 // Installeer Morgan als logger
 app.use(logger('dev'));
@@ -71,6 +63,7 @@ app.use(function (req, res, next) {
 app.use('/api/v1', auth_routes_v1);
 app.use('/api/v1', userroutes_v1);
 app.use('/api/v1', post_routes_v1);
+app.use('/api/v1', subscription_routes_v1);
 
 // Errorhandler voor express-jwt errors
 // Wordt uitgevoerd wanneer err != null; anders door naar next().

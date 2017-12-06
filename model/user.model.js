@@ -8,6 +8,10 @@ const User = {
     "email" : {
         "type" : "string"
     },
+    "subscribes" : {
+        "type" : ["string"],
+        "default" : []
+    },
     "required" : ["username","password","email"]
 }
 

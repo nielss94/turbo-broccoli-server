@@ -9,33 +9,47 @@ var Validator = require('jsonschema').Validator;
 var validator = new Validator();
 var User = require('../model/user.model');
 
-//
-// Geef een lijst van alle users.
-//
 routes.get('/users', function (req, res) {
     neo4j.cypher({
         query: 'MATCH (n:User) RETURN n'
-    }, function(err, results){
+    }, function(err, result){
         if(err){
             res.status(400).json(err);
         }else{
-            res.status(200).json(results);
+            res.status(200).json(result);
         }
     });
 });
 
-//
-// Retourneer één specifieke users. Hier maken we gebruik van URL parameters.
-// Vorm van de URL: http://hostname:3000/api/v1/users/23
-//
 routes.get('/users/:id', function (req, res) {
 
+    const id = req.params.id;
+
+    neo4j.cypher({
+        query: 'MATCH (n:User) WHERE ID(n) = $id RETURN n',
+        params: {
+            id : Number(id)
+        }
+    }, function(err, result){
+        if(err){
+            res.status(400).json(err);
+        }else{
+            var user = result[0].n;
+            if(result.length > 0){
+                res.status(200).json({
+                    username: user.properties.username,
+                    email: user.properties.email,
+                    id: user._id
+                });
+            }else{
+                res.status(400).json({
+                    "error" : "User not found"
+                });
+            }
+        }
+    });
 });
 
-//
-// Voeg een user toe. De nieuwe info wordt gestuurd via de body van de request message.
-// Vorm van de URL: POST http://hostname:3000/api/v1/users
-//
 routes.post('/users', function (req, res) {
  
     if(validator.validate(req.body, User).valid){
@@ -85,26 +99,61 @@ routes.post('/users', function (req, res) {
     }
 });
 
-    //
-    // Wijzig een bestaande user. De nieuwe info wordt gestuurd via de body van de request message.
-    // Er zijn twee manieren om de id van de users mee te geven: via de request parameters (doen we hier)
-    // of als property in de request body.
-// 
-// Vorm van de URL: PUT http://hostname:3000/api/v1/users/23
-//
 routes.put('/users/:id', function (req, res) {
+    const userId = req.params.id;
 
+    const username = req.body.username;
+    const email = req.body.email;
+
+    neo4j.cypher({
+        query: 'MATCH (n:User) WHERE ID(n) = 46 SET n.username = $username SET n.email = $email RETURN n',
+        params : {
+            id : Number(userId),
+            username : username,
+            email : email
+        }
+    }, function(err, result){
+        if(err){
+            res.status(500).json(err);
+        }else{
+            delete result[0].n.properties.password;
+            res.status(200).json(result);
+        }
+    });
 });
 
-//
-// Verwijder een bestaande user.
-// Er zijn twee manieren om de id van de users mee te geven: via de request parameters (doen we hier)
-// of als property in de request body.
-// 
-// Vorm van de URL: DELETE http://hostname:3000/api/v1/users/23
-//
 routes.delete('/users/:id', function (req, res) {
+    //Get the given Id
+    const userId = req.params.id;
 
+    neo4j.cypher({
+        query: 'MATCH (n:User) WHERE ID(n) = $id DETACH DELETE n',
+        params : {
+            id : Number(userId)
+        }
+    },function(err,result){
+        if(err){
+            res.status(500).json(err);
+        }else{
+            res.status(200).json({
+                "Success" : "Successfully deleted " + userId.toString()
+            });
+        }
+    });
 });
+
+routes.get('/users/subscriptions', function(req, res) {
+  
+    neo4j.cypher({
+        query: 'MATCH p=()-[r:SUBSCRIBES_TO]->() RETURN p'
+    },function(err,result) {
+        if(err){
+            res.status(500).json(err);
+        }else{
+            res.status(201).json(result);
+        }
+    });
+});
+
 
 module.exports = routes;
