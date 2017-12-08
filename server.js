@@ -27,15 +27,6 @@ app.use(bodyParser.json({
     type: 'application/vnd.api+json'
 })); // parse application/vnd.api+json as json
 
-//Beveilig alle URL routes, tenzij het om /login of /register gaat.
-app.use(expressJWT({
-    secret: configKey.secretkey
-}).unless({
-    path: [
-        { url: '/api/v1/login', methods: ['POST'] },
-        { url: '/api/v1/users', methods: ['POST'] }
-    ]
-}));
 
 // configureer de app
 app.set('port', (process.env.PORT || config.env.webPort));
@@ -64,6 +55,17 @@ app.use('/api/v1', auth_routes_v1);
 app.use('/api/v1', userroutes_v1);
 app.use('/api/v1', post_routes_v1);
 app.use('/api/v1', subscription_routes_v1);
+
+
+//Beveilig alle URL routes, tenzij het om /login of /register gaat.
+app.use(expressJWT({
+    secret: configKey.secretkey
+}).unless({
+    path: [
+        { url: '/api/v1/login', methods: ['POST'] },
+        { url: '/api/v1/users', methods: ['POST'] }
+    ]
+}));
 
 // Errorhandler voor express-jwt errors
 // Wordt uitgevoerd wanneer err != null; anders door naar next().
