@@ -1,19 +1,14 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const CommentSchema = require('./comment.model');
 
-const PostSchema = new Schema({
-    title: {
-        type: String,
-        required: true
-    },
+const CommentSchema = new Schema({
     content: {
         type: String,
         required: true
     },
-    page: {
+    postId: {
         type: String,
-        required: true
+        default: '-'
     },
     upCoins: {
         type: Number,
@@ -26,17 +21,10 @@ const PostSchema = new Schema({
     user: {
         type: String,
         required: true
-    },
-    comments: {
-        type: [CommentSchema],
-        default: []
-    },
-    tags: [String]
+    }
 }, {
     timestamps: true
 });
 
 
-const Post = mongoose.model('post', PostSchema);
-
-module.exports = Post;
+module.exports = CommentSchema;
