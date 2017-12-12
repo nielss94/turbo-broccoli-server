@@ -2,6 +2,7 @@ var express = require('express');
 var routes = express.Router();
 var mongodb = require('../config/mongo.db');
 var Post = require('../model/post.model');
+var neo4j = require('../config/neo4j.db');
 
 routes.get('/posts', function (req, res) {
     res.contentType('application/json');
@@ -88,12 +89,44 @@ routes.post('/posts', function(req,res) {
     const body = req.body;
 
     const rec = new Post(body);
-
-    rec.save()
-        .then(() => {
-            res.status(200).json(rec);
-        }).catch((error) => {
-            res.status(400).json(error);
+    neo4j.cypher({
+        query: 'MATCH (p:Page {name : $page}) RETURN p',
+        params: {
+            page : body.page
+        }
+    }, function(err, result) {
+        if(err){
+            res.status(500).json(err);
+        }else{
+            if(result.length > 0){
+                rec.save()
+                .then(() => {
+                    res.status(200).json(rec);
+                }).catch((error) => {
+                    res.status(400).json(error);
+                });
+            }else{
+                neo4j.cypher({
+                    query: 'CREATE (p:Page {name : $page}) RETURN p',
+                    params : {
+                        page: body.page
+                    }
+                },function(err,result){
+                    if(err){
+                        res.status(500).json(err);
+                    }else{
+                        if(result.length > 0){
+                            rec.save()
+                            .then(() => {
+                                res.status(200).json(rec);
+                            }).catch((error) => {
+                                res.status(400).json(error);
+                            });
+                        }
+                    }
+                });
+            }
+        }
     });
 });
 
