@@ -14,10 +14,6 @@ const CommentSchema = new Schema({
         type: Number,
         default: 0
     },
-    downCoins: {
-        type: Number,
-        default: 0
-    },
     user: {
         type: String,
         required: true

@@ -215,7 +215,6 @@ routes.put('/posts/:id/comments/:commentId', function(req,res){
     const content = req.body.content;
     const user = req.body.user;
     const postId = req.body.postId;
-    const downCoins = req.body.downCoins;
     const upCoins = req.body.upCoins;
 
     Post.findById(id)
@@ -227,7 +226,6 @@ routes.put('/posts/:id/comments/:commentId', function(req,res){
 
                     if (content) {element.set('content', content);}
                     if (postId) {element.set('postId', postId);}
-                    if (downCoins) {element.set('downCoins', downCoins);}
                     if (upCoins) {element.set('upCoins', upCoins);}
                     if (user) {element.set('user', user);}
                     post.save()
@@ -257,7 +255,6 @@ routes.put('/posts/:id', function(req,res){
     const title = req.body.title;
     const content = req.body.content;
     const page = req.body.page;
-    const downCoins = req.body.downCoins;
     const upCoins = req.body.upCoins;
     const user = req.body.user;
 
@@ -267,7 +264,6 @@ routes.put('/posts/:id', function(req,res){
             if (title) {post.set('title', title);}
             if (content) {post.set('content', content);}
             if (page) {post.set('page', page);}
-            if (downCoins) {post.set('downCoins', downCoins);}
             if (upCoins) {post.set('upCoins', upCoins);}
             if (user) {post.set('user', user);}
             post.save()
