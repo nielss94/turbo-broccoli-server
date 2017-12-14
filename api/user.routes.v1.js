@@ -34,8 +34,8 @@ routes.get('/users/:id', function (req, res) {
         if(err){
             res.status(400).json(err);
         }else{
-            var user = result[0].n;
             if(result.length > 0){
+                var user = result[0].n;
                 res.status(200).json({
                     username: user.properties.username,
                     email: user.properties.email,
