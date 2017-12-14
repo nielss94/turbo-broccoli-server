@@ -68,7 +68,7 @@ routes.post('/subscriptions', function(req, res) {
 function subscribeUserToPage(userId, page, res){
     //Check is the user is already subscribed to this page
     neo4j.cypher({
-        query: 'MATCH (n:User) WHERE ID(n) = $id MATCH (x:Page {name: $page}) MATCH p=((u)-[r:SUBSCRIBES_TO]->(x)) RETURN p',
+        query: 'MATCH (n:User) WHERE ID(n) = $id MATCH (x:Page {name: $page}) MATCH p=((n)-[r:SUBSCRIBES_TO]->(x)) RETURN p',
         params: {
             page: page,
             id : Number(userId)
@@ -79,7 +79,7 @@ function subscribeUserToPage(userId, page, res){
         }else{
             if(result.length > 0) {
                 neo4j.cypher({
-                    query: 'MATCH (n:User) WHERE ID(n) = $id MATCH (x:Page {name: $page}) MATCH p=((u)-[r:SUBSCRIBES_TO]->(x)) DETACH DELETE r',
+                    query: 'MATCH (n:User) WHERE ID(n) = $id MATCH (x:Page {name: $page}) MATCH p=((n)-[r:SUBSCRIBES_TO]->(x)) DETACH DELETE r',
                     params : {
                         id : Number(userId),
                         page: page
